@@ -20,14 +20,16 @@ def direccion_desde_hasta(pos1 : Posicion, pos2 : Posicion) -> Direccion: # prag
 def pasar_turno(j : Juego) -> Juego: # pragma: no cover
     return Juego(j.tablero, oponente(j.turno), 0)
 
-tab: Tablero = [[Pieza(CONEJO,DORADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-                [Pieza(CAMELLO,PLATEADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],                           
-                [Pieza(CABALLO,DORADO),Pieza(CONEJO,DORADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,Pieza(CONEJO,DORADO)],]
+tab: Tablero =  leer_tablero([  
+    "rrrrrrrr",
+    "ccd-hhme",
+    "--------",
+    "--------",
+    "--Rd----",
+    "--------",
+    "E-HHDDCC",
+    "RRRRRRRR"
+    ])
 
 
 def tableroBienFormado (t: Tablero) -> bool:
@@ -225,7 +227,7 @@ def hay_pieza_enemiga_mas_debil_hacia(t : Tablero, pos : Posicion, d : Direccion
 def hay_pieza_enemiga_mas_fuerte_vecina(t : Tablero, pos : Posicion) -> bool:
     return hayPiezaEnemigaMásFuerteVecina (t,pos)
     raise Exception("No implementado")
-print(hay_pieza_enemiga_mas_fuerte_vecina(tab,Posicion(0,0)))
+print(hay_pieza_enemiga_mas_fuerte_vecina(tab,Posicion(3,2)))
 
 def hay_pieza_congelada(t : Tablero, pos : Posicion) -> bool:
     return hayPiezaCongelada (t,pos)
