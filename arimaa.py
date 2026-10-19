@@ -23,13 +23,12 @@ def pasar_turno(j : Juego) -> Juego: # pragma: no cover
 tab: Tablero = [[VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
                 [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
                 [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-                [Pieza(CAMELLO,DORADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],                           
-                [Pieza(CABALLO,DORADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
+                [Pieza(CAMELLO,PLATEADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],                           
+                [Pieza(CABALLO,DORADO),Pieza(CONEJO,DORADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
                 [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
                 [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
                 [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],]
 
-#### Ejercicio 1
 
 def tableroBienFormado (t: Tablero) -> bool:
     columnas_bien: bool = len(t) == ALTO
@@ -56,7 +55,7 @@ def movimientoBienFormado (m: Movimiento) -> bool:
 #print(movimientoBienFormado(Movimiento(Accion(ARRASTRAR),Posicion(5,5),[NORTE,SUR])))
 
 def juegoBienFormado (j: Juego) -> bool:
-    assert tableroBienFormado (j.Tablero)
+    assert tableroBienFormado (j.tablero)
     pasos_usados: bool = 0 <= j.pasos_consumidos < MAX_PASOS
     return pasos_usados
 
@@ -69,22 +68,27 @@ def esPosiciónVecinaHacia (pos: Posicion , d: Direccion , pos2: Posicion | None
         pos2 = Posicion(pos.fila, pos.columna + 1)
     else:
         pos2 = Posicion(pos.fila, pos.columna - 1)
+
+    ##maybe?
+    # if pos2.fila == -1:
+    #     pos2 = Posicion (0,pos.columna)
+    # if pos2.columna == -1:
+    #     pos2 = Posicion (pos2.fila,0)
     return pos2
 
-def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
+def casillaEnPosicion(t : Tablero, p : Posicion) -> Casilla:
     res: Casilla = t[p.fila][p.columna]
     return res
-    raise Exception("No implementado")
 #print(casilla_en_posicion(tab, Posicion(4,0)))
 
 def hayCasillaVacía (t : Tablero , pos : Posicion ) -> bool:
-    esVacia: bool = casilla_en_posicion(t,pos) == VACIA
+    esVacia: bool = casillaEnPosicion(t,pos) == VACIA
     return esVacia
 
 
 def hayFiguraDeColor (t: Tablero , pos: Posicion , f: Figura , col: Color ) -> bool:
     hayFig: bool = False
-    casilla_actual = casilla_en_posicion (t,pos)
+    casilla_actual = casillaEnPosicion (t,pos)
     if  casilla_actual.figura == f:
         if casilla_actual.color == col:
             hayFig = True
@@ -93,7 +97,7 @@ def hayFiguraDeColor (t: Tablero , pos: Posicion , f: Figura , col: Color ) -> b
 
 def hayPiezaDeColor (t : Tablero , pos : Posicion , col : Color ) -> bool:
     res: bool = False
-    c: Casilla = casilla_en_posicion(t,pos)
+    c: Casilla = casillaEnPosicion(t,pos)
     if c != VACIA:
         f:Figura = c.figura
         res: bool = hayFiguraDeColor (t,pos,f,col)
@@ -106,7 +110,7 @@ def hayCasillaVacíaHacia (t : Tablero , pos : Posicion , d : Direccion ) -> boo
 
 def hayPiezaAmigaHacia (t : Tablero , pos : Posicion , d : Direccion ):
     pos_amigo: Posicion = esPosiciónVecinaHacia(pos,d,None)
-    col: Color = casilla_en_posicion(t,pos).color
+    col: Color = casillaEnPosicion(t,pos).color
     return hayPiezaDeColor(t,pos_amigo,col)
 
 def hayPiezaAmigaVecina (t : Tablero , pos : Posicion ) -> bool:
@@ -116,6 +120,49 @@ def hayPiezaAmigaVecina (t : Tablero , pos : Posicion ) -> bool:
             amigo_adyacente = hayPiezaAmigaHacia (t,pos,d)
     return amigo_adyacente
 #print(hayPiezaAmigaVecina(tab,Posicion(4,0)))
+
+def hayPiezaEnemigaMásDébilHacia (t : Tablero , pos : Posicion , d : Direccion ) -> bool:
+    col_amigo: Color = casillaEnPosicion(t,pos).color
+    col_enemigo: Color = oponente(col_amigo)
+    pos_enemigo: Posicion = esPosiciónVecinaHacia(pos,d,None)
+    piezaDebil: bool = False
+
+    if hayPiezaDeColor (t,pos_enemigo,col_enemigo):
+        fuerza_amigo = fuerza((casillaEnPosicion(t,pos).figura))
+        fuerza_enemigo = fuerza((casillaEnPosicion(t,pos_enemigo).figura))
+        piezaDebil = fuerza_amigo > fuerza_enemigo
+    return piezaDebil
+
+def hayPiezaEnemigaMásFuerteHacia (t : Tablero , pos : Posicion , d : Direccion ):
+    col_amigo: Color = casillaEnPosicion(t,pos).color
+    col_enemigo: Color = oponente(col_amigo)
+    pos_enemigo: Posicion = esPosiciónVecinaHacia(pos,d,None)
+    piezaFuerte: bool = False
+
+    if hayPiezaDeColor (t,pos_enemigo,col_enemigo):
+        fuerza_amigo = fuerza((casillaEnPosicion(t,pos).figura))
+        fuerza_enemigo = fuerza((casillaEnPosicion(t,pos_enemigo).figura))
+        piezaFuerte = fuerza_amigo < fuerza_enemigo
+    return piezaFuerte
+#print(hayPiezaEnemigaMásFuerteHacia(tab,Posicion(4,0),ESTE))
+
+def hayPiezaEnemigaMásFuerteVecina (t : Tablero , pos : Posicion ) -> bool:
+    enemigo_fuerte: bool = False
+    for d in Direccion:
+        if not enemigo_fuerte:
+            enemigo_fuerte = hayPiezaEnemigaMásFuerteHacia (t,pos,d)
+    return enemigo_fuerte
+
+def hayPiezaCongelada (t : Tablero , pos : Posicion ):
+    enemigo_fuerte: bool = hayPiezaEnemigaMásFuerteVecina (t,pos)
+    amigo:bool = hayPiezaAmigaVecina (t,pos)
+    congelado: bool = enemigo_fuerte & (not amigo)
+    return congelado
+    
+
+
+        
+#### Ejercicio 1
 
 def tablero_bien_formado(t : Tablero) -> bool:
     return tableroBienFormado(t)
@@ -141,6 +188,10 @@ def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
     raise Exception("No implementado")
 #print(posicion_vecina_hacia(Posicion(6,5),SUR))
 
+def casilla_en_posicion(t : Tablero, pos : Posicion) -> Casilla:
+    return casillaEnPosicion(t,pos)
+    raise Exception("No implementado")
+
 
 def hay_casilla_vacia(t : Tablero, pos : Posicion) -> bool:
     return hayCasillaVacía (t,pos)
@@ -160,17 +211,24 @@ def hay_casilla_vacia_hacia(t : Tablero, pos : Posicion, d : Direccion) -> bool:
 #print(hay_casilla_vacia_hacia(tab,Posicion(3,1),NORTE))
 
 def hay_pieza_amiga_vecina(t : Tablero, pos : Posicion) -> bool:
-
+    return hayPiezaAmigaVecina(t,pos)
     raise Exception("No implementado")
 
 def hay_pieza_enemiga_mas_debil_hacia(t : Tablero, pos : Posicion, d : Direccion) -> bool:
+    return hayPiezaEnemigaMásDébilHacia (t,pos,d)
     raise Exception("No implementado")
+#print(hay_pieza_enemiga_mas_debil_hacia(tab,Posicion(4,0),ESTE))
+
 
 def hay_pieza_enemiga_mas_fuerte_vecina(t : Tablero, pos : Posicion) -> bool:
+    return hayPiezaEnemigaMásFuerteVecina (t,pos)
     raise Exception("No implementado")
+#print(hay_pieza_enemiga_mas_fuerte_vecina(tab,Posicion(4,0)))
 
 def hay_pieza_congelada(t : Tablero, pos : Posicion) -> bool:
+    return hayPiezaCongelada (t,pos)
     raise Exception("No implementado")
+print(hay_pieza_congelada(tab, Posicion(3,0)))
 
 #### Ejercicio 4
 
