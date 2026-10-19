@@ -20,20 +20,23 @@ def direccion_desde_hasta(pos1 : Posicion, pos2 : Posicion) -> Direccion: # prag
 def pasar_turno(j : Juego) -> Juego: # pragma: no cover
     return Juego(j.tablero, oponente(j.turno), 0)
 
+tab: Tablero = [[VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
+                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
+                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
+                [Pieza(CAMELLO,DORADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],                           
+                [Pieza(CABALLO,DORADO),VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
+                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
+                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
+                [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],]
+
 #### Ejercicio 1
 
 def tableroBienFormado (t: Tablero) -> bool:
     columnas_bien: bool = len(t) == ALTO
     filas_bien: bool = len(t[0]) == ANCHO
     return columnas_bien & filas_bien
-# print(tableroBienFormado([[VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-#                           [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-#                           [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-#                           [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-#                           [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-#                           [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-#                           [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],
-#                           [VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA,VACIA],]))
+#print(tablero_bien_formado(tab))
+
 def posiciónEnTablero (pos: Posicion) -> bool:
     fila_valida: bool = 0 <= pos.fila < ALTO
     columna_valida: bool = 0 <= pos.columna < ANCHO
@@ -57,7 +60,7 @@ def juegoBienFormado (j: Juego) -> bool:
     pasos_usados: bool = 0 <= j.pasos_consumidos < MAX_PASOS
     return pasos_usados
 
-def esPosiciónVecinaHacia (pos: Posicion , d: Direccion , pos2: Posicion ):
+def esPosiciónVecinaHacia (pos: Posicion , d: Direccion , pos2: Posicion | None):
     if d == NORTE:
         pos2 = Posicion(pos.fila + 1, pos.columna)
     elif d == SUR:
@@ -66,11 +69,53 @@ def esPosiciónVecinaHacia (pos: Posicion , d: Direccion , pos2: Posicion ):
         pos2 = Posicion(pos.fila, pos.columna + 1)
     else:
         pos2 = Posicion(pos.fila, pos.columna - 1)
-    return (pos,d,pos2)
-        
+    return pos2
+
+def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
+    res: Casilla = t[p.fila][p.columna]
+    return res
+    raise Exception("No implementado")
+#print(casilla_en_posicion(tab, Posicion(4,0)))
+
+def hayCasillaVacía (t : Tablero , pos : Posicion ) -> bool:
+    esVacia: bool = casilla_en_posicion(t,pos) == VACIA
+    return esVacia
 
 
+def hayFiguraDeColor (t: Tablero , pos: Posicion , f: Figura , col: Color ) -> bool:
+    hayFig: bool = False
+    casilla_actual = casilla_en_posicion (t,pos)
+    if  casilla_actual.figura == f:
+        if casilla_actual.color == col:
+            hayFig = True
+    return hayFig
+#print(hayFiguraDeColor(tab,Posicion(4,0),CABALLO,PLATEADO))
 
+def hayPiezaDeColor (t : Tablero , pos : Posicion , col : Color ) -> bool:
+    res: bool = False
+    c: Casilla = casilla_en_posicion(t,pos)
+    if c != VACIA:
+        f:Figura = c.figura
+        res: bool = hayFiguraDeColor (t,pos,f,col)
+    return res
+
+def hayCasillaVacíaHacia (t : Tablero , pos : Posicion , d : Direccion ) -> bool:
+    pos2:Posicion = esPosiciónVecinaHacia(pos,d,None)
+    print(pos2)
+    return hayCasillaVacía (t,pos2)
+
+def hayPiezaAmigaHacia (t : Tablero , pos : Posicion , d : Direccion ):
+    pos_amigo: Posicion = esPosiciónVecinaHacia(pos,d,None)
+    col: Color = casilla_en_posicion(t,pos).color
+    return hayPiezaDeColor(t,pos_amigo,col)
+
+def hayPiezaAmigaVecina (t : Tablero , pos : Posicion ) -> bool:
+    amigo_adyacente: bool = False
+    for d in Direccion:
+        if not amigo_adyacente:
+            amigo_adyacente = hayPiezaAmigaHacia (t,pos,d)
+    return amigo_adyacente
+#print(hayPiezaAmigaVecina(tab,Posicion(4,0)))
 
 def tablero_bien_formado(t : Tablero) -> bool:
     return tableroBienFormado(t)
@@ -91,26 +136,31 @@ def juego_bien_formado(j : Juego) -> bool:
 #### Ejercicio 2
 
 def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
-    pos,d,res = esPosiciónVecinaHacia(pos,d,None)
+    res = esPosiciónVecinaHacia(pos,d,None)
     return res
     raise Exception("No implementado")
 #print(posicion_vecina_hacia(Posicion(6,5),SUR))
 
-def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
-    raise Exception("No implementado")
 
 def hay_casilla_vacia(t : Tablero, pos : Posicion) -> bool:
+    return hayCasillaVacía (t,pos)
     raise Exception("No implementado")
+#print(hayCasillaVacía(tab,Posicion(4,0)))
 
 def hay_pieza_de_color(t : Tablero, pos : Posicion, col : Color) -> bool:
+    return hayPiezaDeColor(t,pos,col)
     raise Exception("No implementado")
+#print(hay_pieza_de_color(tab,Posicion(4,0),DORADO))
 
 #### Ejercicio 3
 
 def hay_casilla_vacia_hacia(t : Tablero, pos : Posicion, d : Direccion) -> bool:
+    return hayCasillaVacíaHacia (t,pos,d)
     raise Exception("No implementado")
+#print(hay_casilla_vacia_hacia(tab,Posicion(3,1),NORTE))
 
 def hay_pieza_amiga_vecina(t : Tablero, pos : Posicion) -> bool:
+
     raise Exception("No implementado")
 
 def hay_pieza_enemiga_mas_debil_hacia(t : Tablero, pos : Posicion, d : Direccion) -> bool:
