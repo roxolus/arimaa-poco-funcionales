@@ -50,31 +50,55 @@ def movimientoBienFormado (m: Movimiento) -> bool:
     else:
         pasos_validos = len(m.pasos) == 2
     return pasos_validos
-print(movimientoBienFormado(Movimiento(Accion(ARRASTRAR),Posicion(5,5),[NORTE,SUR])))
-                
+#print(movimientoBienFormado(Movimiento(Accion(ARRASTRAR),Posicion(5,5),[NORTE,SUR])))
+
+def juegoBienFormado (j: Juego) -> bool:
+    assert tableroBienFormado (j.Tablero)
+    pasos_usados: bool = 0 <= j.pasos_consumidos < MAX_PASOS
+    return pasos_usados
+
+def esPosiciónVecinaHacia (pos: Posicion , d: Direccion , pos2: Posicion ):
+    if NORTE:
+        pos2.fila = pos.fila + 1
+        pos2.columna = pos.columna
+    elif SUR:
+        pos2.fila = pos.fila - 1
+        pos2.columna = pos.columna
+    elif ESTE:
+        pos2.fila = pos.fila
+        pos2.columna = pos.columna + 1
+    else:
+        pos2.fila = pos.fila
+        pos2.columna = pos.columna - 1
         
 
 
 
 
 def tablero_bien_formado(t : Tablero) -> bool:
-    return tableroBienFormado
+    return tableroBienFormado(t)
     raise Exception("No implementado")
 
 def posicion_en_tablero(pos : Posicion) -> bool:
-    return posiciónEnTablero
+    return posiciónEnTablero(pos)
     raise Exception("No implementado")
 
 def movimiento_bien_formado(m : Movimiento) -> bool:
+    return movimientoBienFormado(m)
     raise Exception("No implementado")
 
 def juego_bien_formado(j : Juego) -> bool:
+    juegoBienFormado(j)
     raise Exception("No implementado")
 
 #### Ejercicio 2
 
 def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
+    res: Posicion = Posicion(0,0)
+    esPosiciónVecinaHacia(pos,d,res)
+    return res
     raise Exception("No implementado")
+print(posicion_vecina_hacia(Posicion(6,5),NORTE))
 
 def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
     raise Exception("No implementado")
