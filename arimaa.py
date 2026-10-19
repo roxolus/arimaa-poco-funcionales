@@ -58,18 +58,15 @@ def juegoBienFormado (j: Juego) -> bool:
     return pasos_usados
 
 def esPosiciónVecinaHacia (pos: Posicion , d: Direccion , pos2: Posicion ):
-    if NORTE:
-        pos2.fila = pos.fila + 1
-        pos2.columna = pos.columna
-    elif SUR:
-        pos2.fila = pos.fila - 1
-        pos2.columna = pos.columna
-    elif ESTE:
-        pos2.fila = pos.fila
-        pos2.columna = pos.columna + 1
+    if d == NORTE:
+        pos2 = Posicion(pos.fila + 1, pos.columna)
+    elif d == SUR:
+        pos2 = Posicion(pos.fila - 1, pos.columna)
+    elif d == ESTE:
+        pos2 = Posicion(pos.fila, pos.columna + 1)
     else:
-        pos2.fila = pos.fila
-        pos2.columna = pos.columna - 1
+        pos2 = Posicion(pos.fila, pos.columna - 1)
+    return (pos,d,pos2)
         
 
 
@@ -94,11 +91,10 @@ def juego_bien_formado(j : Juego) -> bool:
 #### Ejercicio 2
 
 def posicion_vecina_hacia(pos : Posicion, d : Direccion) -> Posicion:
-    res: Posicion = Posicion(0,0)
-    esPosiciónVecinaHacia(pos,d,res)
+    pos,d,res = esPosiciónVecinaHacia(pos,d,None)
     return res
     raise Exception("No implementado")
-print(posicion_vecina_hacia(Posicion(6,5),NORTE))
+#print(posicion_vecina_hacia(Posicion(6,5),SUR))
 
 def casilla_en_posicion(t : Tablero, p : Posicion) -> Casilla:
     raise Exception("No implementado")
